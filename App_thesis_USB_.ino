@@ -977,17 +977,17 @@ String getMinute_1() {
 }
 
 void storeHour_2(String n) {
-  for (int k = 8; k < 10; k++) {
+  for (int k = 0; k < 2; k++) {
     EEPROM.write(k, String(n[k]).toInt());
   }}
 
 void storeMinute_2(String n) {
-  for (int k = 8; k < 10; k++) {
+  for (int k = 0; k < 2; k++) {
     EEPROM.write(k+2, String(n[k]).toInt());
   }}
 String getHour_2() {
   String newHour_2 = "";
-  for (int i = 8; i < 10; i++) {
+  for (int i = 0; i < 2; i++) {
     newHour_2 += EEPROM.read(i);
   //  Serial.println(EEPROM.read(i));
   }
@@ -995,7 +995,7 @@ String getHour_2() {
 }
 String getMinute_2() {
   String newMinute_2 = "";
-  for (int i = 10; i <12; i++) {
+  for (int i = 2; i <4; i++) {
     newMinute_2 += EEPROM.read(i);
   //  Serial.println(EEPROM.read(i));
   }
