@@ -167,8 +167,14 @@ String status_flag3;
 String status_flag4;
 
 String bpmstatus_app1;
+String bpmstatus_app2;
+String bpmstatus_app3;
+String bpmstatus_app4;
 
 int bpmvalue_app1 = 0;
+int bpmvalue_app2 = 0;
+int bpmvalue_app3 = 0;
+int bpmvalue_app4 = 0;
 
 int cursor = 0;
 
@@ -285,7 +291,8 @@ void setup() {
         Blynk.virtualWrite(V10,0);
         Blynk.virtualWrite(V12,0);
         Blynk.virtualWrite(V14,0);
-        
+
+        Blynk.virtualWrite(V20,0);   
       }
 
 void loop() { 
@@ -309,7 +316,8 @@ void loop() {
         String currentDOW= DOWString;
         
         Main();
-       
+       // emptyslots(); PAKI COMMENT BACK NA LANG
+        
         bool alarm = false;
         while (alarm == false) {
         IR_1();
@@ -360,8 +368,9 @@ void loop() {
         }
 
       if (realHour == storedHour_1 && realMinute == storedMinute_1 && m == alarmMonth_1 && d == alarmDay_1 && yr == alarmYear_1) { //alarm#1
-          Blynk.logEvent("schedule_reminder","Its time to drink your medicine. Please take it immediately to avoid missed dosage. Keep healthy!");
+          Blynk.logEvent("schedule_reminder");
           beatAvg = 0;
+          storage1= 0;
           on_slot1 == false;
           ir_1 =digitalRead(IRPin_1);
           if (ir_1 == LOW){ 
@@ -372,30 +381,7 @@ void loop() {
             for( uint32_t tStart_1 = millis();  (millis()-tStart_1) < period_1;  ){
                digitalWrite(irLED_1,LOW);
                soundAlarm();
-               String dateString= rtc.getDateStr();
-               String d= dateString.substring (0,2);
-               String m= dateString.substring (3,5);
-               String yr= dateString.substring (6,10);
-               String currentDate= d+"."+ m+"."+ yr;
-                    
-               String timeString = rtc.getTimeStr();
-               String realHour = timeString.substring(0, 2);
-               String realMinute = timeString.substring(3, 5);
-               String currentTime = realHour+":"+realMinute+":00";
-                  
-               String DOWString= rtc.getDOWStr();
-               String currentDOW= DOWString;
-                  
-               Main();
-                  
-               delay(2000); //required for print
-               lcd1.clear();
-               lcd1.setCursor(0, 0);
-               lcd1.print("Date:"+ currentDate);
-               lcd1.setCursor(0, 1);
-               lcd1.print("Time:"+ currentTime);
-               lcd1.setCursor(0, 2);
-               lcd1.print("Day: " + currentDOW);
+               timedisplay();
                
                  bool timeloop1 = false;
                  while (timeloop1 == false){
@@ -459,32 +445,29 @@ void loop() {
                         servodriver.setPWM(servo_1, 0, servoMAX);
                         delay(500);
                         servodriver.setPWM(servo_1, 0, servoMIN);
-                        dispense_1 = true; 
-                        IR_2();
-                        dispensecount(); 
-                        Blynk.virtualWrite(V9, S_appstore1);
-                        Supplyapp_notif1();
                         digitalWrite(indicator_1, HIGH);
                         bpmstatus_app1 = "Normal BPM"; 
                         Blynk.virtualWrite(V21,bpmstatus_app1);
                         off_1 = true;
                         on_slot1 = true;
+                        dispense_1 = true;  
                         break;
-                        }
+                        } 
                        if (storage1 == 0){
                         missed_1 = true;
                         bpmstatus_app1 = "Missed"; 
                         Blynk.virtualWrite(V21,bpmstatus_app1);
                         } 
                      else {
-                        bpmvalue_app1 = storage1;
-                        Blynk.virtualWrite(V20,bpmvalue_app1);
                         notnormal1 = true;
                         BPMNotDisp();
-                        digitalWrite(indicator_1, HIGH);
+                        bpmvalue_app1 = storage1;
+                        Blynk.virtualWrite(V20,bpmvalue_app1);
                         bpmstatus_app1 = "Abnormal BPM"; 
                         Blynk.virtualWrite(V21,bpmstatus_app1);
+                        Blynk.logEvent("abnormal_bpm");
                         off_1 = true;
+                        digitalWrite(indicator_1, HIGH);
                         break;
                       }   
                       
@@ -511,42 +494,20 @@ void loop() {
                 }
                   
            if (realHour == storedHour_2 && realMinute == storedMinute_2 && m == alarmMonth_2 && d == alarmDay_2 && yr == alarmYear_2) { //alarm#2
-              Blynk.logEvent("schedule_reminder","Its time to drink your medicine. Please take it immediately to avoid missed dosage. Keep healthy!");
+              Blynk.logEvent("schedule_reminder");
               beatAvg = 0;
+              storage2= 0;
               on_slot2 == false;
               ir_1 =digitalRead(IRPin_1);
               if (ir_1 == LOW){
                 StatusApp2();
                 }
               else {  
-                uint32_t period_2 = 2 * 60000L;       // 5 minutes loop
+                uint32_t period_2 = 5 * 60000L;       // 5 minutes loop
                 for( uint32_t tStart_2 = millis();  (millis()-tStart_2) < period_2;  ){
                    digitalWrite(irLED_2,LOW);
                    soundAlarm();
-                   String dateString= rtc.getDateStr();
-                   String d= dateString.substring (0,2);
-                   String m= dateString.substring (3,5);
-                   String yr= dateString.substring (6,10);
-                   String currentDate= d+"."+ m+"."+ yr;
-                        
-                   String timeString = rtc.getTimeStr();
-                   String realHour = timeString.substring(0, 2);
-                   String realMinute = timeString.substring(3, 5);
-                   String currentTime = realHour+":"+realMinute+":00";
-                      
-                   String DOWString= rtc.getDOWStr();
-                   String currentDOW= DOWString;
-                      
-                   Main();
-                      
-                   delay(2000); //required for print
-                   lcd1.clear();
-                   lcd1.setCursor(0, 0);
-                   lcd1.print("Date:"+ currentDate);
-                   lcd1.setCursor(0, 1);
-                   lcd1.print("Time:"+ currentTime);
-                   lcd1.setCursor(0, 2);
-                   lcd1.print("Day: " + currentDOW);;
+                   timedisplay();
                    
                      bool timeloop2 = false;
                      while (timeloop2 == false){
@@ -610,16 +571,12 @@ void loop() {
                             servodriver.setPWM(servo_2, 0, servoMAX);
                             delay(500);
                             servodriver.setPWM(servo_2, 0, servoMIN);
-                            dispense_2 = true; 
-                            IR_2();
-                            dispensecount(); 
-                            Blynk.virtualWrite(V11, S_appstore2);
-                            Supplyapp_notif2();
                             digitalWrite(indicator_2, HIGH); 
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1);
                             off_2 = true;
                             on_slot2 = true;
+                            dispense_2 = true; 
                             break;
                             }
                            if (storage2 == 0){
@@ -628,12 +585,15 @@ void loop() {
                             Blynk.virtualWrite(V21,bpmstatus_app1);
                             } 
                          else {
-                            bpmvalue_app1 = storage2;
-                            Blynk.virtualWrite(V20,bpmvalue_app1);
                             notnormal2 = true;
                             BPMNotDisp();
-                            digitalWrite(indicator_2, HIGH);
+                            bpmvalue_app2 = storage2;
+                            Blynk.virtualWrite(V20,bpmvalue_app2);
+                            bpmstatus_app2 = "Abnormal BPM"; 
+                            Blynk.virtualWrite(V21,bpmstatus_app2);
+                            Blynk.logEvent("abnormal_bpm");
                             off_2 = true;
+                            digitalWrite(indicator_2, HIGH);
                             break;
                           }   
                           
@@ -663,42 +623,20 @@ void loop() {
                     }
 
             if (realHour == storedHour_3 && realMinute == storedMinute_3 && m == alarmMonth_3 && d == alarmDay_3 && yr == alarmYear_3) { //alarm#1
-              Blynk.logEvent("schedule_reminder","Its time to drink your medicine. Please take it immediately to avoid missed dosage. Keep healthy!");
-              on_slot3 == false;
+              Blynk.logEvent("schedule_reminder");
               beatAvg = 0;
+              storage3= 0;
+              on_slot3 == false;
               ir_1 =digitalRead(IRPin_1);
               if (ir_1 == LOW){
                 StatusApp3();
                 }
               else { 
-                uint32_t period_3 = 2 * 60000L;       // 5 minutes loop
+                uint32_t period_3 = 5 * 60000L;       // 5 minutes loop
                 for( uint32_t tStart_3 = millis();  (millis()-tStart_3) < period_3;  ){
                    digitalWrite(irLED_1,LOW);
                    soundAlarm();
-                   String dateString= rtc.getDateStr();
-                   String d= dateString.substring (0,2);
-                   String m= dateString.substring (3,5);
-                   String yr= dateString.substring (6,10);
-                   String currentDate= d+"."+ m+"."+ yr;
-                        
-                   String timeString = rtc.getTimeStr();
-                   String realHour = timeString.substring(0, 2);
-                   String realMinute = timeString.substring(3, 5);
-                   String currentTime = realHour+":"+realMinute+":00";
-                      
-                   String DOWString= rtc.getDOWStr();
-                   String currentDOW= DOWString;
-                      
-                   Main();
-                      
-                   delay(2000); //required for print
-                   lcd1.clear();
-                   lcd1.setCursor(0, 0);
-                   lcd1.print("Date:"+ currentDate);
-                   lcd1.setCursor(0, 1);
-                   lcd1.print("Time:"+ currentTime);
-                   lcd1.setCursor(0, 2);
-                   lcd1.print("Day: " + currentDOW);
+                   timedisplay();
                    
                      bool timeloop3 = false;
                      while (timeloop3 == false){
@@ -761,17 +699,13 @@ void loop() {
                             delay(500);
                             servodriver.setPWM(servo_3, 0, servoMAX);
                             delay(500);
-                            servodriver.setPWM(servo_3, 0, servoMIN);
-                            dispense_3 = true; 
-                            IR_2();
-                            dispensecount(); 
-                            Blynk.virtualWrite(V13, S_appstore3);
-                            Supplyapp_notif3();
+                            servodriver.setPWM(servo_3, 0, servoMIN); 
                             digitalWrite(indicator_3, HIGH);
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1); 
                             off_3 = true;
                             on_slot3 = true;
+                            dispense_3 = true;
                             break;
                             }
                            if (storage3 == 0){
@@ -780,14 +714,15 @@ void loop() {
                             Blynk.virtualWrite(V21,bpmstatus_app1);
                             } 
                          else {
-                            bpmvalue_app1 = storage3;
-                            Blynk.virtualWrite(V20,bpmvalue_app1);
                             notnormal3 = true;
                             BPMNotDisp();
-                            digitalWrite(indicator_3, HIGH);
-                            bpmstatus_app1 = "Abnormal BPM"; 
-                            Blynk.virtualWrite(V21,bpmstatus_app1);
+                            bpmvalue_app3 = storage3;
+                            Blynk.virtualWrite(V20,bpmvalue_app3);
+                            bpmstatus_app3 = "Abnormal BPM"; 
+                            Blynk.virtualWrite(V21,bpmstatus_app3);
+                            Blynk.logEvent("abnormal_bpm");
                             off_3 = true;
+                            digitalWrite(indicator_3, HIGH);
                             break;
                           }   
                           
@@ -815,9 +750,10 @@ void loop() {
                     }
 
         if (realHour == storedHour_4 && realMinute == storedMinute_4 && m == alarmMonth_4 && d == alarmDay_4 && yr == alarmYear_4) { //alarm#1
-              Blynk.logEvent("schedule_reminder","Its time to drink your medicine. Please take it immediately to avoid missed dosage. Keep healthy!");
-              on_slot4 == false;
+              Blynk.logEvent("schedule_reminder");
               beatAvg = 0;
+              storage4 = 0;
+              on_slot4 == false;
               ir_1 =digitalRead(IRPin_1);
               if (ir_1 == LOW){
                 StatusApp4();
@@ -827,32 +763,7 @@ void loop() {
                 for( uint32_t tStart_4 = millis();  (millis()-tStart_4) < period_4;  ){
                    digitalWrite(irLED_1,LOW);
                    soundAlarm();
-                   String dateString= rtc.getDateStr();
-                   String d= dateString.substring (0,2);
-                   String m= dateString.substring (3,5);
-                   String yr= dateString.substring (6,10);
-                   String currentDate= d+"."+ m+"."+ yr;
-                        
-                   String timeString = rtc.getTimeStr();
-                   String realHour = timeString.substring(0, 2);
-                   String realMinute = timeString.substring(3, 5);
-                   String currentTime = realHour+":"+realMinute+":00";
-                      
-                   String DOWString= rtc.getDOWStr();
-                   String currentDOW= DOWString;
-                      
-                   Main();
-                      
-                   delay(2000); //required for print
-                   lcd1.clear();
-                   lcd1.setCursor(0, 0);
-                   lcd1.print("Date:"+ currentDate);
-                   lcd1.setCursor(0, 1);
-                   lcd1.print("Time:"+ currentTime);
-                   lcd1.setCursor(0, 2);
-                   lcd1.print("Day: " + currentDOW);
-                   lcd1.setCursor (0,3);
-                   lcd1.print (S_appstore1);
+                   timedisplay();
                    
                      bool timeloop4 = false;
                      while (timeloop4 == false){
@@ -916,16 +827,12 @@ void loop() {
                             servodriver.setPWM(servo_4, 0, servoMAX);
                             delay(500);
                             servodriver.setPWM(servo_4, 0, servoMIN);
-                            dispense_4 = true; 
-                            IR_2();
-                            dispensecount(); 
-                            Blynk.virtualWrite(V15, S_appstore4);
-                            Supplyapp_notif4();
                             digitalWrite(indicator_4, HIGH); 
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1);
                             off_4 = true;
                             on_slot4 = true;
+                            dispense_4 = true; 
                             break;
                             }
                            if (storage4 == 0){
@@ -934,14 +841,15 @@ void loop() {
                             Blynk.virtualWrite(V21,bpmstatus_app1);   
                             } 
                          else {
-                            bpmvalue_app1 = storage4;
-                            Blynk.virtualWrite(V20,bpmvalue_app1);   
                             notnormal4 = true;
                             BPMNotDisp();
-                            digitalWrite(indicator_4, HIGH);
-                            bpmstatus_app1 = "Abnormal BPM"; 
-                            Blynk.virtualWrite(V21,bpmstatus_app1);
+                            bpmvalue_app4 = storage4;
+                            Blynk.virtualWrite(V20,bpmvalue_app4);
+                            bpmstatus_app4 = "Abnormal BPM"; 
+                            Blynk.virtualWrite(V21,bpmstatus_app4);
+                            Blynk.logEvent("abnormal_bpm");
                             off_4 = true;
+                            digitalWrite(indicator_4, HIGH);
                             break;
                           }   
                           
@@ -1085,7 +993,8 @@ void BPMDisp(){
       lcd2.setCursor(0,0); 
       lcd2.print (storage1); 
       lcd2.print(" is normal BPM");
-      delay(1000); 
+      delay(1000);
+      normal1 = false; 
       }
 
       if (normal2 == true){
@@ -1094,6 +1003,7 @@ void BPMDisp(){
       lcd2.print (storage2); 
       lcd2.print(" is normal BPM");
       delay(1000); 
+      normal2 = false;
       }
 
       if (normal3 == true){
@@ -1102,6 +1012,7 @@ void BPMDisp(){
       lcd2.print (storage3); 
       lcd2.print(" is normal BPM");
       delay(1000); 
+      normal3 = false;
       }
 
       if (normal4 == true){
@@ -1110,6 +1021,7 @@ void BPMDisp(){
       lcd2.print (storage4); 
       lcd2.print(" is normal BPM");
       delay(1000); 
+      normal4 = false;
       }
   }
 void BPMNotDisp(){
@@ -1124,7 +1036,9 @@ void BPMNotDisp(){
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
     servodriver.setPWM(servo_1, 0, servoMIN);
+    notnormal1 = false;
     }
+    
     if (notnormal2== true){
     lcd2.setCursor(0,0);  
     lcd2.print (storage2);
@@ -1136,7 +1050,9 @@ void BPMNotDisp(){
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
     servodriver.setPWM(servo_2, 0, servoMIN);
+    notnormal2 = false;
     }
+    
     if (notnormal3== true){
     lcd2.setCursor(0,0);  
     lcd2.print (storage3);
@@ -1148,7 +1064,9 @@ void BPMNotDisp(){
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
     servodriver.setPWM(servo_3, 0, servoMIN);
+    notnormal3 = false;
     }
+    
     if (notnormal4== true){
     lcd2.setCursor(0,0);  
     lcd2.print (storage4);
@@ -1160,11 +1078,8 @@ void BPMNotDisp(){
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
     servodriver.setPWM(servo_4, 0, servoMIN);
-    }
-    
-    
-    
-    }
+    notnormal4 = false;
+    }}
     
 void LED_ON (){
   digitalWrite(light_1, HIGH); 
@@ -1771,6 +1686,7 @@ void IR_1(){
                     if (timesup1 == true){
                     status_flag1 = "WARNING"; 
                     Blynk.virtualWrite (V16, status_flag1 );
+                    Blynk.logEvent("10_minutes_late");
                     on_slot1 = false;
                     }}
            
@@ -1795,6 +1711,7 @@ void IR_1(){
                     if (timesup2 == true){
                     status_flag2 = "WARNING"; 
                     Blynk.virtualWrite (V17, status_flag2 );
+                    Blynk.logEvent("10_minutes_late");
                     on_slot2 = false;
                     }}
                     
@@ -1819,6 +1736,7 @@ void IR_1(){
                     if (timesup3 == true){
                     status_flag3 = "WARNING"; 
                     Blynk.virtualWrite (V18, status_flag3);
+                    Blynk.logEvent("10_minutes_late");
                     on_slot3 = false;
                     }}
                     
@@ -1843,6 +1761,7 @@ void IR_1(){
                     if (timesup4 == true){
                     status_flag4 = "WARNING"; 
                     Blynk.virtualWrite (V19, status_flag4 );
+                    Blynk.logEvent("10_minutes_late");
                     on_slot4 = false;
                     }}
             }
@@ -1859,9 +1778,10 @@ void IR_1(){
            Blynk.virtualWrite (V19, status_flag4 );
             }} 
 void IR_2(){
-   ir_2=digitalRead(IRPin_2);
+   ir_2=digitalRead(IRPin_2); 
      if (ir_2==LOW) {
          digitalWrite(irLED_2,HIGH);
+         dispensecount();
          }
      else{
         digitalWrite(irLED_2,LOW);
@@ -1869,25 +1789,30 @@ void IR_2(){
   
 void dispensecount(){
   if (dispense_1 == true){
-    IR_2();
     S_appstore1 = S_appstore1 - 1; 
+    Blynk.virtualWrite(V9, S_appstore1);
+    Supplyapp_notif1();
     dispense_1 = false;
     }
-  if (dispense_2 == true){
-     IR_2();
+  else if (dispense_2 == true){
      S_appstore2 = S_appstore2 - 1;
+     Blynk.virtualWrite(V11, S_appstore2);
+     Supplyapp_notif2();
      dispense_2 = false;
     }
-  if (dispense_3 == true){
-     IR_2();
+  else if (dispense_3 == true){
      S_appstore3 = S_appstore3 - 1;
+     Blynk.virtualWrite(V13, S_appstore3);
+     Supplyapp_notif3();
      dispense_3 = false;
     }
-  if (dispense_4 == true){
-     IR_2();
+  else if (dispense_4 == true){
      S_appstore4 = S_appstore4 - 1;
+     Blynk.virtualWrite(V15, S_appstore4);
+     Supplyapp_notif4();
      dispense_4= false;
     }
+    
 }
 
 void Supplyapp_notif1(){
@@ -1903,10 +1828,24 @@ void Supplyapp_notif3(){
   Blynk.logEvent("slot3_low_supply","The medicines are running low in Slot#3. Please refill as soon as possible. Stay healthy!");
     }}
 void Supplyapp_notif4(){       
- if (S_appstore4 <= 3){
+  if (S_appstore4 <= 3){
   Blynk.logEvent("slot4_low_supply","The medicines are running low in Slot#4. Please refill as soon as possible. Stay healthy!");
   }}
 
+void emptyslots(){
+    if (S_appstore1 == 0){
+     Blynk.logEvent("slot1_low_supply","Slot#1 is empty. Please refill as soon as possible. Stay healthy!");
+    }
+    if (S_appstore1 == 0){
+     Blynk.logEvent("slot2_low_supply","Slot#2 is empty. Please refill as soon as possible. Stay healthy!");
+    }
+    if (S_appstore1 == 0){
+     Blynk.logEvent("slot3_low_supply","Slot#3 is empty. Please refill as soon as possible. Stay healthy!");
+    }
+    if (S_appstore1 == 0){
+     Blynk.logEvent("slot4_low_supply","Slot#4 is empty. Please refill as soon as possible. Stay healthy!");
+    }}       
+    
 void StatusApp1(){
   digitalWrite(irLED_1,HIGH);
   status_flag1 = "Detected";
@@ -1967,6 +1906,4 @@ void blynkfunc(){
 
         Blynk.virtualWrite (V20, bpmvalue_app1);
         Blynk.virtualWrite (V21, bpmstatus_app1);
-
-  }
-
+  }  
