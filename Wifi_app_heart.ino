@@ -16,16 +16,21 @@
 #include <ESP8266_Lib.h>
 #include <BlynkSimpleShieldEsp8266.h>
 
-char ssid[] = "Reverz A_plus";
-char pass[] = "Samboy27";
+char ssid[] = "GlobeAtHome_18960";
+char pass[] = "d5p6Nuuu";
 #define EspSerial Serial1
 #define ESP8266_BAUD 38400
 ESP8266 wifi(&EspSerial);
 
 #define buzzer_1 12
 #define buzzer_2 13
-#define servoMIN 150
-#define servoMAX 600
+
+#define servoMIN1 600
+#define servoMAX1 350
+
+#define servoMIN2 350
+#define servoMAX2 600
+
 #define light_1 6
 #define light_2 7
 #define light_3 8
@@ -41,7 +46,7 @@ ESP8266 wifi(&EspSerial);
 #define irLED_2 24
 
 MAX30105 particleSensor;
-const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+const byte RATE_SIZE = 3; //Increase this for more averaging. 4 is good.
 byte rates[RATE_SIZE]; //Array of heart rates
 byte rateSpot = 0;
 long lastBeat = 0; //Time at which the last beat occurred
@@ -231,7 +236,7 @@ void setup() {
         if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
         {
           //Serial.println("MAX30105 was not found. Please check wiring/power. ");
-          while (1);
+          //while (1); ETO UNCOMMENT MO PAG MAY ISSUES
         }
         //Serial.println("Place your index finger on the sensor with steady pressure.");
       
@@ -259,10 +264,10 @@ void setup() {
         
         servodriver.begin();
         servodriver.setPWMFreq(60);
-        servodriver.setPWM(servo_1, 0, servoMIN);
-        servodriver.setPWM(servo_2, 0, servoMIN);
-        servodriver.setPWM(servo_3, 0, servoMIN);
-        servodriver.setPWM(servo_4, 0, servoMIN);
+        servodriver.setPWM(servo_1, 0, servoMIN2);
+        servodriver.setPWM(servo_2, 0, servoMIN1);
+        servodriver.setPWM(servo_3, 0, servoMIN1);
+        servodriver.setPWM(servo_4, 0, servoMIN2);
      
         lcd1.init();
         lcd2.init();
@@ -277,8 +282,8 @@ void setup() {
         
         rtc.begin();
         rtc.setDOW(THURSDAY);     // Set Day-of-Week to SUNDAY
-        rtc.setTime(9, 18, 0);     // Set the dafault time HR.MIN.SEC
-        rtc.setDate(07, 9, 2023);   // Set the default date DD.MM.YYYY
+        rtc.setTime(16, 05, 0);     // Set the dafault time HR.MIN.SEC
+        rtc.setDate(15, 10, 2023);   // Set the default date DD.MM.YYYY
         
         pinMode(buzzer_1, OUTPUT);
         digitalWrite(buzzer_1, LOW);
@@ -419,7 +424,6 @@ void loop() {
                         lcd2.setCursor(0,1);
                         lcd2.print("Avg BPM= ");
                         lcd2.print(beatAvg);
-                        timeloop1=true;
                       
                       }
                       if (irValue < 50000) { 
@@ -447,11 +451,10 @@ void loop() {
                         normal1= true;
                         BPMDisp();
                         soundAlarm();
-                        servodriver.setPWM(servo_1, 0, servoMIN);
+                        servodriver.setPWM(servo_1, 0, servoMIN1);
                         delay(500);
-                        servodriver.setPWM(servo_1, 0, servoMAX);
-                        delay(500);
-                        servodriver.setPWM(servo_1, 0, servoMIN);
+                        servodriver.setPWM(servo_1, 0, servoMAX1);
+                        delay(1000);
                         digitalWrite(indicator_1, HIGH);
                         bpmstatus_app1 = "Normal BPM"; 
                         Blynk.virtualWrite(V21,bpmstatus_app1);
@@ -547,7 +550,6 @@ void loop() {
                             lcd2.setCursor(0,1);
                             lcd2.print("Avg BPM= ");
                             lcd2.print(beatAvg);
-                            timeloop2=true;
                           
                           }
                           if (irValue < 50000) { 
@@ -575,11 +577,10 @@ void loop() {
                             normal2= true;
                             BPMDisp();
                             soundAlarm();
-                            servodriver.setPWM(servo_2, 0, servoMIN);
+                            servodriver.setPWM(servo_2, 0, servoMIN2);
                             delay(500);
-                            servodriver.setPWM(servo_2, 0, servoMAX);
-                            delay(500);
-                            servodriver.setPWM(servo_2, 0, servoMIN);
+                            servodriver.setPWM(servo_2, 0, servoMAX2);
+                            delay(1000);
                             digitalWrite(indicator_2, HIGH); 
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1);
@@ -674,7 +675,6 @@ void loop() {
                             lcd2.setCursor(0,1);
                             lcd2.print("Avg BPM= ");
                             lcd2.print(beatAvg);
-                            timeloop3=true;
                           
                           }
                           if (irValue < 50000) { 
@@ -702,11 +702,10 @@ void loop() {
                             normal3= true;
                             BPMDisp();
                             soundAlarm();
-                            servodriver.setPWM(servo_3, 0, servoMIN);
+                            servodriver.setPWM(servo_3, 0, servoMIN2);
                             delay(500);
-                            servodriver.setPWM(servo_3, 0, servoMAX);
-                            delay(500);
-                            servodriver.setPWM(servo_3, 0, servoMIN); 
+                            servodriver.setPWM(servo_3, 0, servoMAX2);
+                            delay(1000);
                             digitalWrite(indicator_3, HIGH);
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1); 
@@ -801,7 +800,6 @@ void loop() {
                             lcd2.setCursor(0,1);
                             lcd2.print("Avg BPM= ");
                             lcd2.print(beatAvg);
-                            timeloop4=true;
                           
                           }
                           if (irValue < 50000) { 
@@ -829,11 +827,10 @@ void loop() {
                             normal4= true;
                             BPMDisp();
                             soundAlarm();
-                            servodriver.setPWM(servo_4, 0, servoMIN);
+                            servodriver.setPWM(servo_4, 0, servoMIN1);
                             delay(500);
-                            servodriver.setPWM(servo_4, 0, servoMAX);
-                            delay(500);
-                            servodriver.setPWM(servo_4, 0, servoMIN);
+                            servodriver.setPWM(servo_4, 0, servoMAX1);
+                            delay(1000);
                             digitalWrite(indicator_4, HIGH); 
                             bpmstatus_app1 = "Normal BPM"; 
                             Blynk.virtualWrite(V21,bpmstatus_app1);
@@ -1043,7 +1040,7 @@ void BPMNotDisp(){
     LED_OFF();
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
-    servodriver.setPWM(servo_1, 0, servoMIN);
+    servodriver.setPWM(servo_1, 0, servoMIN2);
     notnormal1 = false;
     }
     
@@ -1057,7 +1054,7 @@ void BPMNotDisp(){
     LED_OFF();
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
-    servodriver.setPWM(servo_2, 0, servoMIN);
+    servodriver.setPWM(servo_2, 0, servoMIN1);
     notnormal2 = false;
     }
     
@@ -1071,7 +1068,7 @@ void BPMNotDisp(){
     LED_OFF();
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
-    servodriver.setPWM(servo_3, 0, servoMIN);
+    servodriver.setPWM(servo_3, 0, servoMIN1);
     notnormal3 = false;
     }
     
@@ -1085,7 +1082,7 @@ void BPMNotDisp(){
     LED_OFF();
     digitalWrite(buzzer_1,LOW);
     digitalWrite(buzzer_2,LOW);            
-    servodriver.setPWM(servo_4, 0, servoMIN);
+    servodriver.setPWM(servo_4, 0, servoMIN2);
     notnormal4 = false;
     }}
     
